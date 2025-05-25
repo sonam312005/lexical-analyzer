@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lexical Analyzer</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f0f8ff;
+    }
+    h1 {
+        color: #0077b6;
+        border-bottom: 2px solid #0077b6;
+        padding-bottom: 10px;
+    }
+    .language-display {
+        font-weight: bold;
+        color: #023e8a;
+        margin: 15px 0;
+    }
+    .code-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .analyze-btn, .clear-btn {
+        background-color: #00b4d8;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .analyze-btn:hover, .clear-btn:hover {
+        background-color: #0096c7;
+    }
+    .token-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: white;
+    }
+    .token-table th, .token-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .token-table th {
+        background-color: #caf0f8;
+    }
+    .token-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lexical Analyzer</h1>
+
+  <div class="language-display">Language: Java</div>
+  <input type="text" id="codeInput" class="code-input" placeholder="Enter code here..." value="x + 1 :">
+
+  <div class="btn-group">
+    <button class="analyze-btn" id="analyzeBtn">Analyze</button>
+    <button class="clear-btn" id="clearBtn">Clear</button>
+  </div>
+
+  <h2>Token Analysis</h2>
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th>Line</th>
+        <th>Token</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody id="tokenTableBody"></tbody>
+  </table>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const codeInput = document.getElementById('codeInput');
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const tokenTableBody = document.getElementById('tokenTableBody');
+
+      analyzeBtn.addEventListener('click', function () {
+        const code = codeInput.value.trim();
+        if (!code) {
+          alert('Please enter some code to analyze');
+          return;
+        }
+
+        const tokens = tokenize(code);
+        displayTokens(tokens);
+      });
+
+      clearBtn.addEventListener('click', function () {
+        codeInput.value = '';
+        tokenTableBody.innerHTML = '';
+      });
+
+      function tokenize(code) {
+        const tokens = [];
+        const words = code.match(/[a-zA-Z_][a-zA-Z0-9_]*|[0-9]+(?:\.[0-9]+)?|[+\-*/%=<>!&|^~]+|[;,.:(){}[\]]/g) || [];
+        let lineNumber = 1;
+
+        words.forEach(word => {
+          let type = 'unknown';
+          if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(word)) type = 'identifier';
+          else if (/^[0-9]+(\.[0-9]+)?$/.test(word)) type = 'number';
+          else if (/^[+\-*/%=<>!&|^~]+$/.test(word)) type = 'operator';
+          else if (/^[;,.:(){}\[\]]$/.test(word)) type = 'punctuation';
+
+          tokens.push({ line: lineNumber, token: word, type: type });
+        });
+
+        return tokens;
+      }
+
+      function displayTokens(tokens) {
+        tokenTableBody.innerHTML = '';
+        if (tokens.length === 0) {
+          tokenTableBody.innerHTML = '<tr><td colspan="3">No tokens found</td></tr>';
+          return;
+        }
+        tokens.forEach(token => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${token.line}</td><td>${token.token}</td><td>${token.type}</td>`;
+          tokenTableBody.appendChild(row);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
